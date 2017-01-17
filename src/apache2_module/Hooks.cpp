@@ -64,6 +64,7 @@
 #include <Logging.h>
 #include <WatchdogLauncher.h>
 #include <Constants.h>
+#include <AppTypes.h>
 
 /* The Apache/APR headers *must* come after the Boost headers, otherwise
  * compilation will fail on OpenBSD.
@@ -852,7 +853,10 @@ private:
 		result.append(r->method);
 		result.append(" ", 1);
 
-		if (config->allowsEncodedSlashes()) {
+		if (mapper.getApplicationType() == PAT_WSGI) {
+			// wsgi apps don't want escaped URIs
+			result.append(r->uri);
+		} else if (config->allowsEncodedSlashes()) {
 			/*
 			 * Apache decodes encoded slashes in r->uri, so we must use r->unparsed_uri
 			 * if we are to support encoded slashes. However mod_rewrite doesn't change
